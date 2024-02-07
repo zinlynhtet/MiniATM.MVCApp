@@ -9,6 +9,7 @@ namespace MiniATM.MVCApp.EFDbContext
         {
         }
         public DbSet<UserDataModel> UserData { get; set; }
+        public DbSet<AdminDataModel> AdminData { get; set; }
     }
 
 }
