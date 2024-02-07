@@ -1,0 +1,30 @@
+﻿@model List<AdminDataModel>
+@{
+    ViewData["Title"] = "AdminList";
+    int count = 0;
+}
+
+<h4>Admin lists</h4>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">AdminID</th>
+            <th scope="col">AdminUsername</th>
+            <th scope="col">AdminPassword</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <th scope="row">@(++count)</th>
+                <td>@item.AdminID</td>
+                <td>@item.AdminUsername</td>
+                <td>@item.AdminPassword</td>
+            </tr>
+        }
+    </tbody>
+
+</table>
