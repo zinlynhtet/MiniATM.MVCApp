@@ -11,13 +11,13 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NUlid" Version="1.7.1" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Features\Admins\" />
     <Folder Include="Features\Login\" />
     <Folder Include="Features\Users\" />
-    <Folder Include="Views\AdminView\" />
     <Folder Include="Views\LoginView\" />
     <Folder Include="Views\UserView\" />
   </ItemGroup>
