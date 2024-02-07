@@ -1,8 +1,17 @@
+using Microsoft.EntityFrameworkCore;
+using MiniATM.MVCApp.EFDbContext;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddDbContext<AppDbContext>(options =>
+    {
+        string? connectionString = builder.Configuration.GetConnectionString("DbConnection");
+        options.UseSqlServer(connectionString);
+    },
+    ServiceLifetime.Transient,
+    ServiceLifetime.Transient);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
