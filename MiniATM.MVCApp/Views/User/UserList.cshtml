@@ -1,0 +1,36 @@
+﻿@model List<UserDataModel>
+@{
+    ViewData["Title"] = "UserLists";
+    int count = 0;
+}
+
+<h4>Admin lists</h4>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">UserId</th>
+            <th scope="col">UserName</th>
+            <th scope="col">NRC</th>
+            <th scope="col">CardNumber</th>
+            <th scope="col">Password</th>
+            <th scope="col">Balance</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <th scope="row">@(++count)</th>
+                <td>@item.UserId</td>
+                <td>@item.UserName</td>
+                <td>@item.NRC</td>
+                <td>@item.CardNumber </td>
+                <td>@item.Password</td>
+                <td>@item.Balance</td>
+            </tr>
+        }
+    </tbody>
+
+</table>
