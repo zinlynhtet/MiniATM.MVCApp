@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "User Deposit";
+}
+
+<h2>User Deposit</h2>
+
+@if (TempData.ContainsKey("Message"))
+{
+    <div class="alert alert-@(TempData["IsSuccess"] as bool? == true ? "success" : "danger")">
+        @TempData["Message"]
+    </div>
+}
+
+<form action="/user/deposit" method="post">
+    <div class="form-group">
+        <label for="CardNumber">Card Number:</label>
+        <input type="text" name="CardNumber" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Password">Password:</label>
+        <input type="password" name="Password" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Balance">Deposit Amount:</label>
+        <input type="number" name="Balance" class="form-control" required />
+    </div>
+    <a href="/user" type="button" class="btn btn-warning">Cancel</a>
+    <button type="submit" class="btn btn-primary">Deposit</button>
+</form>
+
