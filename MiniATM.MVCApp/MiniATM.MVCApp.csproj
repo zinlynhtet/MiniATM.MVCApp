@@ -18,8 +18,6 @@
     <Folder Include="Features\Admins\" />
     <Folder Include="Features\Login\" />
     <Folder Include="Features\Users\" />
-    <Folder Include="Views\LoginView\" />
-    <Folder Include="Views\UserView\" />
   </ItemGroup>
 
 </Project>
