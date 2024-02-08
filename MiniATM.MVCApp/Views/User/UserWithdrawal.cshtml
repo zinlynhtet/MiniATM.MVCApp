@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "User Withdrawal";
+}
+
+<h2>User Withdrawal</h2>
+
+@if (TempData.ContainsKey("Message"))
+{
+    <div class="alert alert-@(TempData["IsSuccess"] as bool? == true ? "success" : "danger")">
+        @TempData["Message"]
+    </div>
+}
+
+<form action="/user/withdrawal" method="post">
+    <div class="form-group">
+        <label for="CardNumber">Card Number:</label>
+        <input type="text" name="CardNumber" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Password">Password:</label>
+        <input type="password" name="Password" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Balance">Withdrawal Amount:</label>
+        <input type="number" name="Balance" class="form-control" required />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Withdraw</button>
+</form>
+
