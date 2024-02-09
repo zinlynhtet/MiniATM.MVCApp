@@ -14,10 +14,4 @@
     <PackageReference Include="NUlid" Version="1.7.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Features\Admins\" />
-    <Folder Include="Features\Login\" />
-    <Folder Include="Features\Users\" />
-  </ItemGroup>
-
 </Project>
