@@ -4,8 +4,14 @@
     ViewData["Title"] = "User Details";
 }
 
-<h2>User Details</h2>
+<h2>@Model.UserName's Account Details</h2>
 
+@if (TempData.ContainsKey("Message"))
+{
+    <div class="alert alert-@(TempData["IsSuccess"] as bool? == true ? "success" : "danger")">
+        @TempData["Message"]
+    </div>
+}
 @if (Model != null)
 {
     <dl class="row">
