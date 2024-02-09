@@ -2,30 +2,38 @@
 using Microsoft.EntityFrameworkCore;
 using MiniATM.MVCApp.EFDbContext;
 using MiniATM.MVCApp.Models;
-using Newtonsoft.Json;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace MiniATM.MVCApp.Controllers
 {
-    public class LoginController(AppDbContext  context) : Controller
+    public class LoginController : Controller
     {
-        private readonly AppDbContext _context = context;
+        private readonly AppDbContext _context;
+
+        public LoginController(AppDbContext context)
+        {
+            _context = context;
+        }
 
         public IActionResult Index()
         {
-            return View("Index");
+            return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> Index(UserDataModel reqModel)
         {
+
             var userData = await _context.UserData
                 .FirstOrDefaultAsync(b => b.CardNumber == reqModel.CardNumber && b.Password == reqModel.Password);
-            if (userData == null)
+
+            if (userData != null)
             {
-                return RedirectToAction("Index");
+                HttpContext.Session.SetString("LoginData", userData.UserId);
+                return RedirectToAction("Index", "Home");
             }
-            HttpContext.Session.SetString("LoginData",userData.UserId);
-            return Redirect($"/home/Index");
+            return View(reqModel);
         }
     }
 }
