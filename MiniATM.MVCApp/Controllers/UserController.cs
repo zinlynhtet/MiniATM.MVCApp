@@ -13,12 +13,13 @@ namespace MiniATM.MVCApp.Controllers
         public UserController(AppDbContext context)
         {
             _context = context;
-        }
+        }  
 
         public IActionResult Index()
         {
             var lst = _context.UserData.AsNoTracking().ToList();
-
+            var userName = lst[0].UserName;
+            ViewBag.UserName = userName;
             return View("UserList", lst);
         }
 
@@ -29,8 +30,7 @@ namespace MiniATM.MVCApp.Controllers
         }
 
         [HttpPost]
-        [ActionName("Save")]
-        public async Task<IActionResult> UserSave(UserDataModel reqModel)
+        public async Task<IActionResult> UserRegister(UserDataModel reqModel)
         {
 
             reqModel.UserId = Ulid.NewUlid().ToString();
@@ -62,27 +62,38 @@ namespace MiniATM.MVCApp.Controllers
         }
 
         [HttpPost]
-        [ActionName("Withdrawal")]
         public async Task<IActionResult> UserWithdrawal(UserDataModel reqModel)
         {
-            var userData = await _context.UserData
-                .FirstOrDefaultAsync(b => b.CardNumber == reqModel.CardNumber && b.Password == reqModel.Password);
-
-            if (userData == null || reqModel.Balance <= 0 || reqModel.Balance > userData.Balance)
+            UserDataModel? user = await _context.UserData.FirstOrDefaultAsync(x => x.CardNumber == reqModel.CardNumber && x.Password == reqModel.Password);
+            if (user == null || user.Balance < reqModel.Balance || reqModel.Balance == 0)
             {
-                TempData["Message"] = "Withdrawal failed. Invalid data or insufficient balance.";
+                TempData["Message"] = "User not found.";
                 TempData["IsSuccess"] = false;
 
-                return View("UserWithdrawal");
+                return Json(new ResponseMessageModel(false, "User not found."));
             }
 
-            userData.Balance -= reqModel.Balance;
-            _context.UserData.Update(userData);
-            var result = await _context.SaveChangesAsync();
-            var message = result > 0 ? $"Withdraw Successful. Remaining Balance: {userData.Balance} $" : "Withdraw failed.";
-            TempData["Message"] = message;
-            TempData["IsSuccess"] = result > 0;
-            return Redirect("/user");
+            var transaction = _context.Database.BeginTransaction();
+            try
+            {
+                decimal newBalance = user.Balance - reqModel.Balance;
+                user.Balance = newBalance;
+                _context.UserData.Update(user);
+                int result = await _context.SaveChangesAsync();
+                transaction.Commit();
+
+                TempData["Message"] = "Withdrawal successful.";
+                TempData["IsSuccess"] = result > 0;
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                Console.WriteLine(ex.Message);
+                TempData["Message"] = "An error occurred during withdrawal.";
+                TempData["IsSuccess"] = false;
+                throw;
+            }
+            return View("UserWithdrawal");
         }
 
         [ActionName("Deposit")]
@@ -92,125 +103,39 @@ namespace MiniATM.MVCApp.Controllers
         }
 
         [HttpPost]
-        [ActionName("Deposit")]
         public async Task<IActionResult> UserDeposit(UserDataModel reqModel)
         {
-            var userData = await _context.UserData
-                .FirstOrDefaultAsync(b => b.CardNumber == reqModel.CardNumber && b.Password == reqModel.Password);
-
-            if (userData == null)
+            UserDataModel? user = await _context.UserData.FirstOrDefaultAsync(x => x.CardNumber == reqModel.CardNumber && x.Password == reqModel.Password);
+            if (user == null)
             {
-                TempData["Message"] = "Invalid cardNum or pin.";
+                TempData["Message"] = "User not found.";
                 TempData["IsSuccess"] = false;
-                return View("UserDeposit");
+
+                return Json(new ResponseMessageModel(false, "User not found."));
             }
 
-            userData.Balance += reqModel.Balance;
-            _context.UserData.Update(userData);
-            var result = await _context.SaveChangesAsync();
-            var message = result > 0 ? $"Deposit Successful. New Balance: {userData.Balance} $" : "Deposit failed.";
-            TempData["Message"] = message;
-            TempData["IsSuccess"] = result > 0;
-            return Redirect("/user");
-        }
-
-        [HttpPost]
-        [ActionName("Remove")]
-        public async Task<IActionResult> RemoveUser(UserDataModel reqModel)
-        {
-            var userData = await _context.UserData.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == reqModel.UserId);
-            if (userData is null)
+            var transaction = _context.Database.BeginTransaction();
+            try
             {
-                TempData["Message"] = "No data found.";
+                decimal newBalance = user.Balance + reqModel.Balance;
+                user.Balance = newBalance;
+                _context.UserData.Update(user);
+                int result = await _context.SaveChangesAsync();
+                transaction.Commit();
+
+                TempData["Message"] = "Deposit successful.";
+                TempData["IsSuccess"] = result > 0;
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                Console.WriteLine(ex.Message);
+                TempData["Message"] = "An error occurred during deposit.";
                 TempData["IsSuccess"] = false;
-                goto result;
+                throw;
             }
-            _context.Remove(userData);
-            int result = _context.SaveChanges();
-            string message = result > 0 ? "Deleting Successful." : "Deleting Failed.";
-            TempData["Message"] = message;
-            TempData["IsSuccess"] = result > 0;
-        result:
-            return Redirect("/user");
+            return View("UserDeposit");
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ThreeYearsTransitionRecord()
-        {
-            int total = 0;
-            DateTime currentDate = DateTime.Now;
-            DateTime addYear;
-            List<int> years = new List<int>();
-            var userId = HttpContext.Session.GetString("LoginData");
-            var userData = await _context.UserData.FirstOrDefaultAsync(x => x.UserId == userId);
-            for (int i = 0; i < 3; i++)
-            {
-                addYear = currentDate.AddYears(-1 * i);
-                years.Add(addYear.Year);
-            }
-            Random random = new Random();
-            int totalTransitionAmount = 0;
-            bool isSuccess = true;
-            using (var transition = await _context.Database.BeginTransactionAsync())
-            {
-                try
-                {
-                    for (int i = 0; i < 3; i++)
-                    {
-                        for (int j = 0; j < 365; j++)
-                        {
-                            total = i;
-                            decimal Amount = random.Next(100000, 1000000);
-                            decimal income_amount = random.Next(100000, 1000000);
-
-                            DateTime start_date = new DateTime(years[i], 1, 1);
-                            DateTime end_date = new DateTime(years[i], 12, 31);
-                            int range = (end_date - start_date).Days;
-                            int randomDays = random.Next(range);
-                            DateTime randomDate = start_date.AddDays(randomDays);
-                            string transferId = Ulid.NewUlid().ToString();
-                            int transitionAmount = random.Next(1, 101);
-                            totalTransitionAmount += transitionAmount;
-                            var transitionHistory = new TransitionHistoryModel
-                            {
-                                TransferId = transferId,
-                                FromAccount = userData!.CardNumber.ToString()!,
-                                ToAccount = GenerateRandom12DigitNumber().ToString(),
-                                TransferDate = randomDate,
-                                UserId = userId!,
-                                TransitionAmount = transitionAmount,
-                            };
-                            await _context.TransitionHistory.AddAsync(transitionHistory);
-                            await _context.SaveChangesAsync();
-                        }
-                    }
-
-                    if (userData!.Balance < totalTransitionAmount)
-                    {
-                        await transition.RollbackAsync();
-                        goto result;
-                    }
-                    userData.Balance -= totalTransitionAmount;
-                    _context.UserData.Update(userData);
-                    await _context.SaveChangesAsync();
-                    await transition.CommitAsync();
-                }
-                catch (Exception ex)
-                {
-                    isSuccess = false;
-                    await transition.RollbackAsync();
-                    Console.WriteLine(ex.Message);
-                }
-            }
-        result:
-            return Json(new
-            {
-                isSuccess = isSuccess,
-                CurrentBalance = userData!.Balance,
-                TransitionAmount = totalTransitionAmount,
-                RemainingBalance = userData.Balance - totalTransitionAmount,
-                TransitionStatus = isSuccess ? "Transition Successful." : "Transition Failed.",
-            });
-        }
     }
 }
