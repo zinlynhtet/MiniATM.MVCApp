@@ -10,7 +10,7 @@ namespace MiniATM.MVCApp.EFDbContext
         }
         public DbSet<UserDataModel> UserData { get; set; }
         public DbSet<AdminDataModel> AdminData { get; set; }
-        public DbSet<TransitionHistoryModel> TransitionHistory { get; set; }
+        public DbSet<TransactionHistoryModel> TransactionHistory { get; set; }
     }
 
 }
