@@ -2,7 +2,10 @@
 
 public class ResponseMessageModel
 {
-    public ResponseMessageModel() { }
+    public ResponseMessageModel(string message)
+    {
+        Message = message;
+    }
     public ResponseMessageModel(bool isSuccess, string message)
     {
         IsSuccess = isSuccess;
