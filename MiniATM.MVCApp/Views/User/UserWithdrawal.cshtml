@@ -1,17 +1,14 @@
-﻿@{
-    ViewData["Title"] = "User Withdrawal";
-}
+﻿@model UserDataModel
 
 <h2>User Withdrawal</h2>
 
 @if (TempData.ContainsKey("Message"))
 {
     <div class="alert alert-@(TempData["IsSuccess"] as bool? == true ? "success" : "danger")">
-        @TempData["Message"]
+        @TempData["Message"] 
     </div>
 }
-
-<form action="/user/withdrawal" method="post">
+<form asp-action="UserWithdrawal" method="post">
     <div class="form-group">
         <label for="CardNumber">Card Number:</label>
         <input type="text" name="CardNumber" class="form-control" required />
@@ -23,10 +20,9 @@
     </div>
 
     <div class="form-group">
-        <label for="Balance">Withdrawal Amount:</label>
+        <label for="Balance">Withdraw Amount:</label>
         <input type="number" name="Balance" class="form-control" required />
     </div>
-
+    <a href="/home/Index" type="button" class="btn btn-warning">Cancel</a>
     <button type="submit" class="btn btn-primary">Withdraw</button>
 </form>
-
