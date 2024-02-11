@@ -18,8 +18,6 @@ namespace MiniATM.MVCApp.Controllers
         public IActionResult Index()
         {
             var lst = _context.UserData.AsNoTracking().ToList();
-            var userName = lst[0].UserName;
-            ViewBag.UserName = userName;
             return View("UserList", lst);
         }
 
@@ -30,8 +28,9 @@ namespace MiniATM.MVCApp.Controllers
         }
 
         [HttpPost]
+        [ActionName("UserRegister")]
         public async Task<IActionResult> UserRegister(UserDataModel reqModel)
-        {
+            {
 
             reqModel.UserId = Ulid.NewUlid().ToString();
             reqModel.CardNumber = (int?)GenerateRandom12DigitNumber();
@@ -40,8 +39,9 @@ namespace MiniATM.MVCApp.Controllers
             var message = result > 0 ? "Registration Successful." : "Registration failed.";
             TempData["Message"] = message;
             TempData["IsSuccess"] = result > 0;
+            MessageModel model = new MessageModel(result > 0, message);
 
-            return Redirect("/user");
+            return Json(model);
         }
 
         private long GenerateRandom12DigitNumber()
