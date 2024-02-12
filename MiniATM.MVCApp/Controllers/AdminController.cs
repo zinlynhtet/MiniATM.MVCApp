@@ -10,12 +10,24 @@ namespace MiniATM.MVCApp.Controllers
     {
         private readonly AppDbContext _context = context;
 
-        [ActionName("Index")]
-        public IActionResult AdminList()
+        [ActionName("List")]
+        public async Task<IActionResult> Index(int pageNo = 1, int pageSize = 10)
         {
-            var lst = _context.AdminData.AsNoTracking().ToList();
+            AdminDataResponseModel model = new AdminDataResponseModel();
+            List<AdminDataModel> lst = _context.AdminData.AsNoTracking()
+                .Skip((pageNo - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
-            return View("AdminList", lst);
+            int rowCount = await _context.AdminData.CountAsync();
+            int pageCount = rowCount / pageSize;
+            if (rowCount % pageSize > 0)
+                pageCount++;
+
+            model.AdminData = lst;
+            model.PageSetting = new PageSettingModel(pageNo, pageSize, pageCount, "/admin/adminlist");
+
+            return View("AdminList", model);
         }
 
         [ActionName("Create")]
@@ -34,7 +46,7 @@ namespace MiniATM.MVCApp.Controllers
             var message = adminData > 0 ? "Registration Successful." : "Registration failed.";
             TempData["Message"] = message;
             TempData["IsSuccess"] = adminData > 0;
-            return Redirect("/admin");
+            return Redirect("/admin/list");
         }
 
         [HttpGet]
@@ -51,6 +63,7 @@ namespace MiniATM.MVCApp.Controllers
                 addYear = currentDate.AddYears(-1 * i);
                 years.Add(addYear.Year);
             }
+
             Random random = new Random();
             int totalTransactionAmount = 0;
             bool isSuccess = true;
@@ -93,6 +106,7 @@ namespace MiniATM.MVCApp.Controllers
                         await transaction.RollbackAsync();
                         goto result;
                     }
+
                     userData.Balance -= totalTransactionAmount;
                     _context.UserData.Update(userData);
                     await _context.SaveChangesAsync();
@@ -105,7 +119,8 @@ namespace MiniATM.MVCApp.Controllers
                     Console.WriteLine(ex.Message);
                 }
             }
-        result:
+
+            result:
             return Json(new
             {
                 isSuccess,
@@ -115,6 +130,7 @@ namespace MiniATM.MVCApp.Controllers
                 TransitionStatus = isSuccess ? "Transition Successful." : "Transition Failed.",
             });
         }
+
         private long GenerateRandom12DigitNumber()
         {
             Random random = new Random();
@@ -124,6 +140,27 @@ namespace MiniATM.MVCApp.Controllers
             long result = firstDigit * 100000000 + remainingDigits;
 
             return result;
+        }
+
+        [HttpPost]
+        [ActionName("RemoveUser")]
+        public async Task<IActionResult> RemoveUser(UserDataModel reqModel)
+        {
+            UserDataModel? userData = await _context.UserData.FirstOrDefaultAsync(x => x.UserId == reqModel.UserId);
+
+            if (userData is null)
+            {
+                return Json(new MessageModel(false, "No data found."));
+            }
+
+            _context.UserData.Remove(userData);
+            var result = await _context.SaveChangesAsync();
+            string message = result > 0 ? "User has been deleted." : "Deleting Failed.";
+            TempData["Message"] = message;
+            TempData["IsSuccess"] = result > 0;
+
+            MessageModel model = new MessageModel(result > 0, message);
+            return Json(model);
         }
     }
 }
