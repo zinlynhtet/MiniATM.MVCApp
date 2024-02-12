@@ -17,14 +17,9 @@ namespace MiniATM.MVCApp.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public  IActionResult Index()
         {
-            var userId = HttpContext.Session.GetString("LoginData");
-            if (userId == null) return Redirect("/login");
-            var userData = await _context.UserData
-                .FirstOrDefaultAsync(b => b.UserId == userId);
-
-            return View(userData);
+            return View();
         }
 
         public IActionResult Privacy()
