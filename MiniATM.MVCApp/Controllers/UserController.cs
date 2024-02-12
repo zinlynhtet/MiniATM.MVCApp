@@ -13,12 +13,26 @@ namespace MiniATM.MVCApp.Controllers
         public UserController(AppDbContext context)
         {
             _context = context;
-        }  
+        }
 
-        public IActionResult Index()
+        [ActionName("List")]
+        public async Task<IActionResult> Index(int pageNo = 1, int pageSize = 10)
         {
-            var lst = _context.UserData.AsNoTracking().ToList();
-            return View("UserList", lst);
+            UserDataResponseModel model = new UserDataResponseModel();
+            List<UserDataModel> lst = _context.UserData.AsNoTracking()
+                .Skip((pageNo - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            int rowCount = await _context.UserData.CountAsync();
+            int pageCount = rowCount / pageSize;
+            if (rowCount % pageSize > 0)
+                pageCount++;
+
+            model.Users = lst;
+            model.PageSetting = new PageSettingModel(pageNo, pageSize, pageCount, "/user/Index");
+
+            return View("UserList", model);
         }
 
         [ActionName("Register")]
@@ -28,7 +42,7 @@ namespace MiniATM.MVCApp.Controllers
         }
 
         [HttpPost]
-        [ActionName("UserRegister")]
+        [ActionName("Save")]
         public async Task<IActionResult> UserRegister(UserDataModel reqModel)
             {
 
