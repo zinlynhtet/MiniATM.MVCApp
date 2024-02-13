@@ -18,15 +18,12 @@ namespace MiniATM.MVCApp.Controllers
                 .Skip((pageNo - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
-
             int rowCount = await _context.AdminData.CountAsync();
             int pageCount = rowCount / pageSize;
             if (rowCount % pageSize > 0)
                 pageCount++;
-
             model.AdminData = lst;
             model.PageSetting = new PageSettingModel(pageNo, pageSize, pageCount, "/admin/adminlist");
-
             return View("AdminList", model);
         }
 
@@ -120,7 +117,7 @@ namespace MiniATM.MVCApp.Controllers
                 }
             }
 
-            result:
+        result:
             return Json(new
             {
                 isSuccess,
@@ -134,11 +131,9 @@ namespace MiniATM.MVCApp.Controllers
         private long GenerateRandom12DigitNumber()
         {
             Random random = new Random();
-
             long firstDigit = random.Next(1, 10);
             long remainingDigits = random.Next(0, 100000000);
             long result = firstDigit * 100000000 + remainingDigits;
-
             return result;
         }
 
@@ -147,18 +142,15 @@ namespace MiniATM.MVCApp.Controllers
         public async Task<IActionResult> RemoveUser(UserDataModel reqModel)
         {
             UserDataModel? userData = await _context.UserData.FirstOrDefaultAsync(x => x.UserId == reqModel.UserId);
-
             if (userData is null)
             {
                 return Json(new MessageModel(false, "No data found."));
             }
-
             _context.UserData.Remove(userData);
             var result = await _context.SaveChangesAsync();
             string message = result > 0 ? "User has been deleted." : "Deleting Failed.";
             TempData["Message"] = message;
             TempData["IsSuccess"] = result > 0;
-
             MessageModel model = new MessageModel(result > 0, message);
             return Json(model);
         }
