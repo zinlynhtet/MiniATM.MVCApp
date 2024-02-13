@@ -1,4 +1,4 @@
-﻿@model List<AdminDataModel>
+﻿@model AdminDataResponseModel
 @{
     ViewData["Title"] = "AdminList";
     int count = 0;
@@ -8,23 +8,23 @@
 
 <table class="table">
     <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">AdminID</th>
-            <th scope="col">AdminUsername</th>
-            <th scope="col">AdminPassword</th>
-        </tr>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">AdminID</th>
+        <th scope="col">AdminUsername</th>
+        <th scope="col">AdminPassword</th>
+    </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <th scope="row">@(++count)</th>
-                <td>@item.AdminID</td>
-                <td>@item.AdminUsername</td>
-                <td>@item.AdminPassword</td>
-            </tr>
-        }
+    @foreach (var item in Model.AdminData)
+    {
+        <tr>
+            <th scope="row">@(++count)</th>
+            <td>@item.AdminID</td>
+            <td>@item.AdminUsername</td>
+            <td>@item.AdminPassword</td>
+        </tr>
+    }
     </tbody>
-
 </table>
+@await Html.PartialAsync("_Pagination", Model.PageSetting)
