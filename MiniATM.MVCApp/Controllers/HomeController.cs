@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MiniATM.MVCApp.Models;
 using System.Diagnostics;
 using MiniATM.MVCApp.EFDbContext;
+using Newtonsoft.Json;
 
 namespace MiniATM.MVCApp.Controllers
 {
@@ -17,14 +18,24 @@ namespace MiniATM.MVCApp.Controllers
             _context = context;
         }
 
-        public  IActionResult Index()
+        public IActionResult Index()
         {
-            return View();
+            var userData = HttpContext.Session.GetString("LoginData");
+            if (userData == null)
+                return Redirect("/login");
+            var jsonUser = JsonConvert.DeserializeObject<LoginDataModel>(userData);
+            var userDetail = _context.UserData.FirstOrDefault(x => x.CardNumber == jsonUser!.CardNumber);
+            return View(userDetail);
         }
 
-        public IActionResult Privacy()
+        public IActionResult AdminDetail()
         {
-            return View();
+            var adminData = HttpContext.Session.GetString("AdminData");
+            if (adminData == null)
+                return Redirect("/login");
+            var jsonUser = JsonConvert.DeserializeObject<LoginDataModel>(adminData);
+            var adminDetail = _context.AdminData.FirstOrDefault(x => x.AdminUsername == jsonUser!.AdminUsername);
+            return View(adminDetail);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
