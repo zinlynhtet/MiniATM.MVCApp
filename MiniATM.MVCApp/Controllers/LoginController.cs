@@ -13,55 +13,6 @@ using Newtonsoft.Json;
 
 namespace MiniATM.MVCApp.Controllers
 {
-    //public class LoginController : Controller
-    //{
-    //    private readonly AppDbContext _context;
-
-    //    public LoginController(AppDbContext context)
-    //    {
-    //        _context = context;
-    //    }
-
-    //    public IActionResult Index()
-    //    {
-    //        return View();
-    //    }
-
-    //    [HttpPost]
-    //    public async Task<IActionResult> Index(UserDataModel reqModel)
-    //    {
-
-    //        var userData = await _context.UserData
-    //            .FirstOrDefaultAsync(b => b.CardNumber == reqModel.CardNumber && b.Password == reqModel.Password);
-
-    //        if (userData != null)
-    //        {
-    //            HttpContext.Session.SetString("LoginData", userData.UserId);
-    //            return RedirectToAction("Index", "Home");
-    //        }
-    //        return View(reqModel);
-    //    }
-
-    //    public IActionResult AdminLogin()
-    //    {
-    //        return View();
-    //    }
-
-    //    [HttpPost]
-    //    public async Task<IActionResult> AdminLogin(AdminDataModel reqModel)
-    //    {
-    //        var adminData = await _context.AdminData
-    //            .FirstOrDefaultAsync(x => x.AdminUsername == reqModel.AdminUsername && x.AdminPassword == reqModel.AdminPassword);
-
-    //        if (adminData != null)
-    //        {
-    //            HttpContext.Session.SetString("LoginData", adminData.AdminID);
-    //            return RedirectToAction("Index", "User");
-    //        }
-
-    //        return View(reqModel);
-    //    }
-    ////}
     public class LoginController : Controller
     {
         private readonly IConfiguration _configuration;
@@ -75,11 +26,12 @@ namespace MiniATM.MVCApp.Controllers
             _menuService = menuService;
         }
 
+        [ActionName("Index")]
         public IActionResult Index()
         {
             return View();
         }
-        
+
         [ActionName("AdminLogin")]
         public IActionResult AdminLogin()
         {
@@ -94,15 +46,18 @@ namespace MiniATM.MVCApp.Controllers
                 return View();
             }
             var user = AuthenticateUser(reqModel);
+            var tokenString = GenerateJwtToken(user);
+            var option = new CookieOptions();
+            option.Expires = DateTime.Now.AddMinutes(30);
+            Response.Cookies.Append("Authorization", tokenString, option);
 
-            if (user != null)
+            if (user.Role is "Admin") goto result;
+            if (user.Role is "User")
             {
-                var tokenString = GenerateJwtToken(user);
-                var option = new CookieOptions();
-                option.Expires = DateTime.Now.AddMinutes(30);
-                Response.Cookies.Append("Authorization", tokenString, option);
+                return Redirect("/Home");
             }
-            return Redirect("/Home");
+            result:
+            return Redirect("/user/list");
         }
 
         private AuthenticationModel AuthenticateUser(LoginDataModel reqModel)
@@ -116,7 +71,8 @@ namespace MiniATM.MVCApp.Controllers
             {
                 roleData.Role = "User";
                 var userMenu = _menuService.GenerateMenu(roleData.Role);
-                HttpContext.Session.SetString("Menu",JsonConvert.SerializeObject(userMenu));
+                HttpContext.Session.SetString("Menu", JsonConvert.SerializeObject(userMenu));
+                HttpContext.Session.SetString("LoginData", JsonConvert.SerializeObject(reqModel));
             }
 
             if (adminData is not null)
@@ -124,6 +80,7 @@ namespace MiniATM.MVCApp.Controllers
                 roleData.Role = "Admin";
                 var adminMenu = _menuService.GenerateMenu(roleData.Role);
                 HttpContext.Session.SetString("Menu", JsonConvert.SerializeObject(adminMenu));
+                HttpContext.Session.SetString("AdminData", JsonConvert.SerializeObject(reqModel));
             }
             return roleData;
         }
