@@ -28,16 +28,6 @@ namespace MiniATM.MVCApp.Controllers
             return View(userDetail);
         }
 
-        public IActionResult AdminDetail()
-        {
-            var adminData = HttpContext.Session.GetString("AdminData");
-            if (adminData == null)
-                return Redirect("/login");
-            var jsonUser = JsonConvert.DeserializeObject<LoginDataModel>(adminData);
-            var adminDetail = _context.AdminData.FirstOrDefault(x => x.AdminUsername == jsonUser!.AdminUsername);
-            return View(adminDetail);
-        }
-
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
