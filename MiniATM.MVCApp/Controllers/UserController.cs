@@ -28,7 +28,7 @@ namespace MiniATM.MVCApp.Controllers
             if (rowCount % pageSize > 0)
                 pageCount++;
             model.Users = lst;
-            model.PageSetting = new PageSettingModel(pageNo, pageSize, pageCount, "/user/Index");
+            model.PageSetting = new PageSettingModel(pageNo, pageSize, pageCount, "/user/List");
             return View("UserList", model);
         }
 
