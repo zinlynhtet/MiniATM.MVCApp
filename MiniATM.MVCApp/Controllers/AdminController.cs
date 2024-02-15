@@ -23,7 +23,7 @@ namespace MiniATM.MVCApp.Controllers
             if (rowCount % pageSize > 0)
                 pageCount++;
             model.AdminData = lst;
-            model.PageSetting = new PageSettingModel(pageNo, pageSize, pageCount, "/admin/adminlist");
+            model.PageSetting = new PageSettingModel(pageNo, pageSize, pageCount, "/admin/List");
             return View("AdminList", model);
         }
 
@@ -149,6 +149,24 @@ namespace MiniATM.MVCApp.Controllers
             _context.UserData.Remove(userData);
             var result = await _context.SaveChangesAsync();
             string message = result > 0 ? "User has been deleted." : "Deleting Failed.";
+            TempData["Message"] = message;
+            TempData["IsSuccess"] = result > 0;
+            MessageModel model = new MessageModel(result > 0, message);
+            return Json(model);
+        }
+
+        [HttpPost]
+        [ActionName("RemoveAdmin")]
+        public async Task<IActionResult> RemoveAdmin(AdminDataModel reqModel)
+        {
+            AdminDataModel? adminData = await _context.AdminData.FirstOrDefaultAsync(x => x.AdminID == reqModel.AdminID);
+            if (adminData is null)
+            {
+                return Json(new MessageModel(false, "No data found."));
+            }
+            _context.AdminData.Remove(adminData);
+            var result = await _context.SaveChangesAsync();
+            string message = result > 0 ? "Admin has been deleted." : "Deleting Failed.";
             TempData["Message"] = message;
             TempData["IsSuccess"] = result > 0;
             MessageModel model = new MessageModel(result > 0, message);
