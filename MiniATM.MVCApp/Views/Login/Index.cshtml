@@ -1,33 +1,34 @@
-﻿@model MiniATM.MVCApp.Models.UserDataModel
+﻿@model UserDataModel
 
-@{ 
+@{
     ViewData["Title"] = "User Login";
     Layout = "~/Views/Shared/_Login.cshtml";
 }
+<div class="modal fade show" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModal" style="display: block; padding-right: 17px;" aria-modal="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Login</h5>
 
-
-<h2>User Login</h2>
-
-@if (TempData.ContainsKey("ErrorMessage"))
-{
-    <div class="alert alert-danger">
-        @TempData["ErrorMessage"]
+            </div>
+            <div class="modal-body">
+                <form asp-action="Index" method="post">
+                    <div class="form-group">
+                        <label for="CardNumber" class="form-label">CardNumber</label>
+                        <input type="text" class="form-control" name="CardNumber" asp-for="CardNumber" required>
+                        <span asp-validation-for="CardNumber" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="Password" class="form-label">Password</label>
+                        <input type="password" class="form-control" name="Password" asp-for="Password" required>
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary ps-5 pe-5">Login</button>
+                </form>
+                <div class="card-footer text-start mt-2">
+                    <p class="mb-0">Login as <a href="login/AdminLogin">Admin</a></p>
+                </div>
+            </div>
+        </div>
     </div>
-}
-
-<form asp-action="Index" method="post">
-    <div class="form-group">
-        <label for="CardNumber">Card Number:</label>
-        <input type="text" class="form-control" name="CardNumber" asp-for="CardNumber">
-        <span asp-validation-for="CardNumber" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="Password">Password:</label>
-        <input type="password" class="form-control" name="Password" asp-for="Password">
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Login</button>
-    <p class="mt-2">Are you new here? <a class="fw-bold" href="/user/register">Sign Up</a></p>
-</form>
+</div>
