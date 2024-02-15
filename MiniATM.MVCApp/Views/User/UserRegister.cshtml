@@ -1,7 +1,5 @@
 ﻿@model UserDataModel
-@{
-    Layout = "~/Views/Shared/_Login.cshtml";
-}
+
 <div class="container-fluid">
     <div class="row h-100">
         <div class="col-lg-4 col-md-7 col-sm-12 mx-auto align-self-center">
@@ -9,43 +7,44 @@
                 <div class="text-center">
                     <h3 class="title">Create User account</h3>
                 </div>
-                <div class="mb-4">
-                    <label class="mb-1 text-dark">UserName</label>
-                    <input id="userName" class="form-control" required />
-                </div>
+                <form id="userRegistrationForm">
+                    <div class="mb-4">
+                        <label class="mb-1 text-dark">UserName</label>
+                        <input id="userName" class="form-control" required />
+                    </div>
 
-                <div class="mb-4">
-                    <label class="mb-1 text-dark">CurrentBalance</label>
-                    <input id="balance" class="form-control" required />
-                </div>
+                    <div class="mb-4">
+                        <label class="mb-1 text-dark">CurrentBalance</label>
+                        <input id="balance" class="form-control" required />
+                    </div>
 
-                <div class="mb-4 position-relative">
-                    <label class="mb-1 text-dark">Password</label>
-                    <input id="password" class="form-control" required />
-                </div>
+                    <div class="mb-4 position-relative">
+                        <label class="mb-1 text-dark">Password</label>
+                        <input id="password" class="form-control" required />
+                    </div>
 
-                <div class="mb-4">
-                    <label class="mb-1 text-dark">NRCNo</label>
-                    <input id="nrc" class="form-control" required />
-                </div>
+                    <div class="mb-4">
+                        <label class="mb-1 text-dark">NRCNo</label>
+                        <input id="nrc" class="form-control" required />
+                    </div>
 
-                <div class="pb-3">
-                    <button type="button" class="btn btn-primary ladda-button w-full" data-style="expand-left" id="btnSave">
-                        <span class="ladda-label">Register</span>
-                    </button>
-                    <div class="mb-3 mt-2">
-                        <a target="_blank" href="https://www.facebook.com/" class="fab fa-facebook-f btn-facebook"></a>
-                        <a target="_blank" href="https://www.google.com/" class="fab fa-google-plus-g btn-google-plus mx-2"></a>
-                        <a target="_blank" href="https://www.linkedin.com/" class="fab fa-linkedin-in btn-linkedin me-2"></a>
-                        <a target="_blank" href="https://twitter.com/" class="fab fa-twitter btn-twitter"></a>
-                    </div>  
-                </div>
-
-               
+                    <div class="pb-3">
+                        <button type="button" class="btn btn-primary ladda-button w-full" data-style="expand-right" data-size="s" id="btnSave">
+                            <span class="ladda-label">Register</span>
+                        </button>
+                        <div class="mb-3 mt-2">
+                            <a target="_blank" href="https://www.facebook.com/" class="fab fa-facebook-f btn-facebook"></a>
+                            <a target="_blank" href="https://www.google.com/" class="fab fa-google-plus-g btn-google-plus mx-2"></a>
+                            <a target="_blank" href="https://www.linkedin.com/" class="fab fa-linkedin-in btn-linkedin me-2"></a>
+                            <a target="_blank" href="https://twitter.com/" class="fab fa-twitter btn-twitter"></a>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
+
 @section scripts {
     <script>
         $('#btnSave').click(function (e) {
@@ -55,7 +54,6 @@
             l.start();
 
             var _reqModel = {
-                
                 UserName: $('#userName').val(),
                 Password: $('#password').val(),
                 Balance: $('#balance').val(),
@@ -63,19 +61,19 @@
             };
 
             $.ajax({
-                url: '/user/UserRegister',
+                url: '/user/save',
                 type: 'POST',
                 data: {
                     reqModel: _reqModel
                 },
                 success: function (data) {
                     l.stop();
-                    showMessage(data, "/user");
+                    showMessage(data, "/user/list");
                 },
                 error: function (request, status, error) {
                     console.log({ request, status, error });
                 }
             });
-        })
+        });
     </script>
 }
