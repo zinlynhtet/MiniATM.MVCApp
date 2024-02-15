@@ -1,0 +1,28 @@
+﻿@model AdminDataModel
+@{
+    Layout = "~/Views/Shared/_Login.cshtml";
+    ViewData["Title"] = "Admin Login";
+}
+<div class="modal fade show" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModal" style="display: block; padding-right: 17px;" aria-modal="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Login</h5>
+
+            </div>
+            <div class="modal-body">
+                <form asp-action="Index" method="post">
+                    <div class="mb-3">
+                        <label for="AdminUsername" class="form-label">Hello Admin! 👋 What's your Username?</label>
+                        <input type="text" class="form-control" id="AdminUsername" name="AdminUsername" value="@Model?.AdminUsername" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="AdminPassword" class="form-label">Great! 🔐 Now, what's your Password?</label>
+                        <input type="password" class="form-control" id="AdminPassword" name="AdminPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
