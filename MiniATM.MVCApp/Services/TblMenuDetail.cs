@@ -30,7 +30,7 @@ public class TblMenuDetail
 
     public static List<TblMenuDetail> MenuDetail = new List<TblMenuDetail>()
     {
-        new TblMenuDetail("M001","C001","Withdrawal","User","Withdrawal"),
+        new TblMenuDetail("M001","C001","Withdrawal","User","UserWithdrawal"),
         new TblMenuDetail("M001","C002","Deposit","User","Deposit"),
         new TblMenuDetail("M002","C003","User Lists","User","List"),
         new TblMenuDetail("M002","C004","Admin Lists","Admin","List"),
