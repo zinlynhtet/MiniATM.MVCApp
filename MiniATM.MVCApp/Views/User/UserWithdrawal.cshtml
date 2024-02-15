@@ -2,27 +2,50 @@
 
 <h2>User Withdrawal</h2>
 
-@if (TempData.ContainsKey("Message"))
+<div class="form-group">
+    <label for="CardNumber">Card Number:</label>
+    <input type="text" name="CardNumber" id="cardNumber" class="form-control" required />
+</div>
+
+<div class="form-group">
+    <label for="Password">Password:</label>
+    <input type="password" name="Password" id="password" class="form-control" required />
+</div>
+
+<div class="form-group">
+    <label for="Balance">Withdraw Amount:</label>
+    <input type="number" name="Balance" id="balance" class="form-control" required />
+</div>
+<a href="/home/Index" type="button" class="btn btn-warning">Cancel</a>
+<button type="submit" class="btn btn-primary btnWithdraw">Withdraw</button>
+@section scripts
 {
-    <div class="alert alert-@(TempData["IsSuccess"] as bool? == true ? "success" : "danger")">
-        @TempData["Message"] 
-    </div>
+    <script>
+        $('.btnWithdraw').click(function (e) {
+            e.preventDefault();
+
+            var _reqModel = {
+                CardNumber: $('#cardNumber').val(),
+                Password: $('#password').val(),
+                Balance: $('#balance').val(),
+            };
+            confirmMessage("Do you want to withdraw?").then((result) => {
+                if (!result) return;
+                $.ajax({
+                    url: '/user/userwithdrawal',
+                    type: 'POST',
+                    data: {
+                        reqModel: _reqModel
+                    },
+                    success: function (data) {
+                        showMessage(data, "/home/Index");
+                    },
+                    error: function (request, status, error) {
+                        console.log({ request, status, error });
+                    }
+                });
+
+            })
+        })
+    </script>
 }
-<form asp-action="UserWithdrawal" method="post">
-    <div class="form-group">
-        <label for="CardNumber">Card Number:</label>
-        <input type="text" name="CardNumber" class="form-control" required />
-    </div>
-
-    <div class="form-group">
-        <label for="Password">Password:</label>
-        <input type="password" name="Password" class="form-control" required />
-    </div>
-
-    <div class="form-group">
-        <label for="Balance">Withdraw Amount:</label>
-        <input type="number" name="Balance" class="form-control" required />
-    </div>
-    <a href="/home/Index" type="button" class="btn btn-warning">Cancel</a>
-    <button type="submit" class="btn btn-primary">Withdraw</button>
-</form>
