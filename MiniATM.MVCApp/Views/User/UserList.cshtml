@@ -1,11 +1,10 @@
-﻿@model List<UserDataModel>
+﻿@model UserDataResponseModel
 @{
-    Layout = "~/Views/Shared/_Login.cshtml";
     ViewData["Title"] = "UserLists";
     int count = 0;
 }
 
-<h4>Admin lists</h4>
+<h4>User lists</h4>
 
 <table class="table">
     <thead>
@@ -15,12 +14,12 @@
             <th scope="col">UserName</th>
             <th scope="col">NRC</th>
             <th scope="col">CardNumber</th>
-            <th scope="col">Password</th>
             <th scope="col">Balance</th>
+
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.Users)
         {
             <tr>
                 <th scope="row">@(++count)</th>
@@ -28,10 +27,42 @@
                 <td>@item.UserName</td>
                 <td>@item.NRC</td>
                 <td>@item.CardNumber </td>
-                <td>@item.Password</td>
                 <td>@item.Balance</td>
+                <td>
+                    <a class="btn btn-danger btnDelete" data-user-id="@item.UserId">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
+                </td>
             </tr>
         }
     </tbody>
-
 </table>
+@await Html.PartialAsync("_Pagination", Model.PageSetting)
+@section scripts {
+    <script>
+        $(".btnDelete").click(function () {
+            var _reqModel = {
+                UserId: $(this).data('user-id'),
+            };
+
+            confirmMessage("Are you sure want to delete?").then((result) => {
+                if (!result) return;
+
+                $.ajax({
+                    url: "/admin/removeUser",
+                    type: "POST",
+                    data:
+                    {
+                        reqModel: _reqModel
+                    },
+                    success: function (data) {
+                        showMessage(data, '/user/list');
+                    },
+                    error: function (request, status, error) {
+                        console.log({ request, status, error });
+                    }
+                });
+            });
+        });
+    </script>
+}
