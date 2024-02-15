@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Newtonsoft.Json
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -6,24 +7,21 @@
     <title>@ViewData["Title"] - MiniATM.MVCApp</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.css" integrity="sha512-wJgJNTBBkLit7ymC6vvzM1EcSWeM9mmOu+1USHaRBbHkm6W9EgM0HY27+UtUaprntaYQJF75rc8gjxllKs5OIQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda-themeless.min.css" integrity="sha512-O82mrFLGbN9lUKQvbguKzEWmMtn4jO6txC9byiL0cjPGz4MeREeBY9dQR0ymgy8LhRgUL8JG0HtAGKYzg8pkTA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda.min.css" integrity="sha512-zB1n/jwQD1XiJf3rDBfZVm5xqngjw1C48MYyJ8XOd/7OLvDbjUmY9+gGyeJORcYXSv3qFOZ3VdHAoullPFHIYA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="~/MiniATM.MVCApp.styles.css" asp-append-version="true" />
-
     <base href="/" />
     <!-- app favicon -->
     <link rel="shortcut icon" href="theme/assets/img/favicon.ico">
     <!-- google fonts -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
     <!-- plugin stylesheets -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda-themeless.min.css" integrity="sha512-O82mrFLGbN9lUKQvbguKzEWmMtn4jO6txC9byiL0cjPGz4MeREeBY9dQR0ymgy8LhRgUL8JG0HtAGKYzg8pkTA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda.min.css" integrity="sha512-zB1n/jwQD1XiJf3rDBfZVm5xqngjw1C48MYyJ8XOd/7OLvDbjUmY9+gGyeJORcYXSv3qFOZ3VdHAoullPFHIYA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
     <link rel="stylesheet" type="text/css" href="theme/assets/css/vendors.css" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
-
     <!-- app style -->
     <link rel="stylesheet" type="text/css" href="theme/assets/css/style.css" />
     @await RenderSectionAsync("style", required: false)
@@ -54,12 +52,6 @@
                                 <i class="fa-solid fa-align-right"></i>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="/login" class="nav-link sidebar-toggle">
-                                Logout
-                            </a>
-                        </li>
-
                     </ul>
                     <ul class="navbar-nav nav-right ml-auto">
                         <li class="nav-item dropdown">
@@ -300,14 +292,26 @@
         <div class="sidebar-nav scrollbar scroll_light">
             <ul class="metismenu " id="sidebarNav">
                 <li class="nav-static-title">Personal</li>
-                <li>
-                    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><span class="nav-title">Options</span></a>
-                    <ul aria-expanded="false">
-                        <li> <a href="/user/withdrawal">Withdrawal</a></li>
-                        <li> <a href="/user/deposit">Deposit</a> </li>
-                    </ul>
-                </li>
-
+                @{
+                    var httpContextAccessor = new HttpContextAccessor();
+                    var menuList = JsonConvert.DeserializeObject<List<MenuModel>>(httpContextAccessor.HttpContext.Session.GetString("Menu"));
+                }
+                @foreach (var item in menuList)
+                {
+                    <li>
+                        @{
+                            var route = string.IsNullOrWhiteSpace(item.ManinMenuController) ? "javascript:void(0)"
+                            : $"/{item.ManinMenuController}/{item.ActionName}";
+                        }
+                        <a class="has-arrow" href="@route" aria-expanded="false"><span class="nav-title">@item.MainMenu</span></a>
+                        <ul aria-expanded="false">
+                            @foreach (var subMenu in item.SubMenus)
+                            {
+                                <li> <a href="/@subMenu.SubMenuController/@subMenu.ActionName">@subMenu.SubMenu</a></li>
+                            }
+                        </ul>
+                    </li>
+                }
 
             </ul>
         </div>
@@ -327,6 +331,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.js" integrity="sha512-zlWWyZq71UMApAjih4WkaRpikgY9Bz1oXIW5G0fED4vk14JjGlQ1UmkGM392jEULP8jbNMiwLWdM8Z87Hu88Fw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda.jquery.min.js" integrity="sha512-RJr7eb1jbqpSlOiF23EqYEzzm1Sqo/CqE9UfI98Tm5kICqWIAWreT7vOoDBmqpohh8PmQbwdykTS+YE7tkXSaA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/spin.min.js" integrity="sha512-qByKQKO3eTwzJtP8Y395YbP45QyYZNpJfYu8jfFpWgFTK2xWIiOER7G+63EoXk475fBFzY6HIhbEUio6m72EaQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda.min.js" integrity="sha512-OxowQ96EheBKRxTivGsizVvTK8bWt2xZlymiMZ9MArbmOmuxbv+2IlC46k4gZPhZH5eVQAm0F6lk9Yt6M4xu7A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
