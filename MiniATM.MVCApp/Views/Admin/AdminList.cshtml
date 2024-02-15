@@ -8,23 +8,53 @@
 
 <table class="table">
     <thead>
-    <tr>
-        <th scope="col">#</th>
-        <th scope="col">AdminID</th>
-        <th scope="col">AdminUsername</th>
-        <th scope="col">AdminPassword</th>
-    </tr>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">AdminID</th>
+            <th scope="col">AdminUsername</th>
+
+        </tr>
     </thead>
     <tbody>
-    @foreach (var item in Model.AdminData)
-    {
-        <tr>
-            <th scope="row">@(++count)</th>
-            <td>@item.AdminID</td>
-            <td>@item.AdminUsername</td>
-            <td>@item.AdminPassword</td>
-        </tr>
-    }
+        @foreach (var item in Model.AdminData)
+        {
+            <tr>
+                <th scope="row">@(++count)</th>
+                <td>@item.AdminID</td>
+                <td>@item.AdminUsername</td>
+                <td>
+                    <a class="btn btn-danger btnDelete" data-admin-id="@item.AdminID">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
 @await Html.PartialAsync("_Pagination", Model.PageSetting)
+@section scripts {
+    <script>
+        $(".btnDelete").click(function () {
+            var _reqModel = {
+                AdminID: $(this).data('admin-id'),
+            };
+            confirmMessage("Are you sure want to delete?").then((result) => {
+                if (!result) return;
+                $.ajax({
+                    url: "/admin/RemoveAdmin",
+                    type: "POST",
+                    data:
+                    {
+                        reqModel: _reqModel
+                    },
+                    success: function (data) {
+                        showMessage(data, '/admin/list');
+                    },
+                    error: function (request, status, error) {
+                        console.log({ request, status, error });
+                    }
+                });
+            });
+        })
+    </script>
+}
