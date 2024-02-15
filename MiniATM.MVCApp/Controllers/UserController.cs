@@ -62,7 +62,7 @@ namespace MiniATM.MVCApp.Controllers
             return result;
         }
 
-        [ActionName("Withdrawal")]
+        [ActionName("UserWithdrawal")]
         public IActionResult UserWithdrawal()
         {
             return View("UserWithdrawal");
@@ -71,35 +71,52 @@ namespace MiniATM.MVCApp.Controllers
         [HttpPost]
         public async Task<IActionResult> UserWithdrawal(UserDataModel reqModel)
         {
-            UserDataModel? user = await _context.UserData.FirstOrDefaultAsync(x => x.CardNumber == reqModel.CardNumber && x.Password == reqModel.Password);
-            if (user == null || user.Balance < reqModel.Balance || reqModel.Balance == 0)
-            {
-                TempData["Message"] = "User not found.";
-                TempData["IsSuccess"] = false;
-
-                return Json(new ResponseMessageModel(false, "User not found."));
-            }
-            var transaction = _context.Database.BeginTransaction();
             try
             {
-                decimal newBalance = user.Balance - reqModel.Balance;
-                user.Balance = newBalance;
-                _context.UserData.Update(user);
-                int result = await _context.SaveChangesAsync();
-                transaction.Commit();
+                var user = await _context.UserData.FirstOrDefaultAsync(x => x.CardNumber == reqModel.CardNumber && x.Password == reqModel.Password);
 
-                TempData["Message"] = "Withdrawal successful.";
-                TempData["IsSuccess"] = result > 0;
+                if (user == null || user.Balance < reqModel.Balance || reqModel.Balance <= 0)
+                {
+                    TempData["Message"] = "User not found or insufficient balance.";
+                    TempData["IsSuccess"] = false;
+
+                    return Json(new MessageModel(false, "User not found or insufficient balance."));
+                }
+
+                using (var transaction = _context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        decimal newBalance = user.Balance - reqModel.Balance;
+                        user.Balance = newBalance;
+                        _context.UserData.Update(user);
+
+                        int result = await _context.SaveChangesAsync();
+                        transaction.Commit();
+
+                        TempData["Message"] = "Withdrawal successful.";
+                        TempData["IsSuccess"] = result > 0;
+
+                        var model = new MessageModel(result > 0, "Withdrawal successful.");
+                        return Json(model);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine(ex.Message);
+                        TempData["Message"] = "An error occurred during withdrawal.";
+                        TempData["IsSuccess"] = false;
+                        throw;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                transaction.Rollback();
                 Console.WriteLine(ex.Message);
                 TempData["Message"] = "An error occurred during withdrawal.";
                 TempData["IsSuccess"] = false;
-                throw;
+                return Json(new MessageModel(false, "An error occurred during withdrawal."));
             }
-            return View("UserWithdrawal");
         }
 
         [ActionName("Deposit")]
@@ -109,6 +126,7 @@ namespace MiniATM.MVCApp.Controllers
         }
 
         [HttpPost]
+        [ActionName("UserDeposit")]
         public async Task<IActionResult> UserDeposit(UserDataModel reqModel)
         {
             UserDataModel? user = await _context.UserData.FirstOrDefaultAsync(x => x.CardNumber == reqModel.CardNumber && x.Password == reqModel.Password);
@@ -129,6 +147,8 @@ namespace MiniATM.MVCApp.Controllers
                 transaction.Commit();
                 TempData["Message"] = "Deposit successful.";
                 TempData["IsSuccess"] = result > 0;
+                var model = new MessageModel(result > 0, "Deposit successful.");
+                return Json(model);
             }
             catch (Exception ex)
             {
@@ -138,7 +158,6 @@ namespace MiniATM.MVCApp.Controllers
                 TempData["IsSuccess"] = false;
                 throw;
             }
-            return View("UserDeposit");
         }
     }
 }
